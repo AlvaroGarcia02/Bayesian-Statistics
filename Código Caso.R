@@ -6,18 +6,18 @@
 #==============================================================================
 
 rm(list = ls())
+setwd("C:/Users/Hewlett-Packard/Documents/R/Caso de estudio - EB - 2025-1")
 
 #==============================================================================
 # Creación de la base de datos
 #==============================================================================
 
-library(readxl)
+library(readxl) 
 library(dplyr)
 # (Todos los archivos, excepto el Panel de Educación y el Panel de Conflicto y
-# Violencia, se cargan tal cual aparecen en el Dropbox del Caso de estudio.
-# Debe especificarse la ruta desde la cual se cargan los archivos. La ruta que
-# aparece en las siguientes líneas de código corresponde a la del computador en
-# el cual fue creado este archivo de código).
+# Violencia, se cargan tal cual aparecen en el Dropbox del Caso de estudio. Se
+# recomienda guardar esos archivos y los que aparecen en la carpeta Data en 
+# GitHub dentro de una misma carpeta junto con este documento de RStudio).
 
 Examen <- read.table("Examen_Saber_11_2022_2_Entrenamiento.txt",
                      header = TRUE, sep = ";", dec = ".")
@@ -57,7 +57,7 @@ fami_educacionpadre_bin <- ifelse(Base$fami_educacionpadre ==
                                     Base$fami_educacionpadre == "Postgrado", 1, 0)
 Base$fami_educacionpadre <- fami_educacionpadre_bin
 
-Panel.Carac.Gen <- read_excel("C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/PANEL_CARACTERISTICAS_GENERALES(2022).xlsx")
+Panel.Carac.Gen <- read_excel("PANEL_CARACTERISTICAS_GENERALES(2022).xlsx")
 Panel.Carac.Gen.nbi <- Panel.Carac.Gen[!is.na(Panel.Carac.Gen$nbi),
                                        c("codmpio", "ano", "nbi")]
 rm(Panel.Carac.Gen)
@@ -74,9 +74,10 @@ dim(Base)
 # que contenga únicamente las columnas codmpio, ano, docen_total y alumn_total,
 # con el fin de no forzar la memoria del computador al ser el archivo original
 # un documento de Excel con demasiadas columnas, las cuales no serán consultadas
-# para el presente trabajo. De todas formas, se puede correr el archivo original
-# en caso de trabajar con un ordenador con buena memoria RAM).
-Panel.Educ <- read_excel("C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/PANEL_DE_EDUCACION(2022)_Modificado.xlsx")
+# para el presente trabajo. En la carpeta "Data" de GitHub se encuentra el
+# archivo modificado que fue empleado. De todas formas, se puede correr el
+#archivo original en caso de trabajar con un ordenador con buena memoria RAM).
+Panel.Educ <- read_excel("PANEL_DE_EDUCACION(2022)_Modificado.xlsx")
 Panel.Educ.doc.alu <- Panel.Educ[!is.na(Panel.Educ$docen_total), ]
 rm(Panel.Educ)
 Panel.Educ.doc.alu <- Panel.Educ.doc.alu %>% 
@@ -89,8 +90,7 @@ Base <- merge(Base, Panel.Educ.doc.alu, by = "estu_cod_reside_mcpio")
 rm(Panel.Educ.doc.alu)
 dim(Base)
 
-LAFT.FT <- read_excel("C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/LAFT.xlsx",
-                      sheet = "FT")
+LAFT.FT <- read_excel("LAFT.xlsx", sheet = "FT")
 estu_cod_reside_mcpio <- c(05001, 05002, 05004, 05021, 05030, 05031, 05034,
                            05036, 05038, 05040, 05042, 05044, 05045, 05051, 
                            05055, 05059, 05079, 05086, 05088, 05091, 05093,
@@ -259,8 +259,7 @@ Base <- merge(Base, LAFT.FT.RISK, by = "estu_cod_reside_mcpio")
 rm(LAFT.FT.RISK)
 dim(Base)
 
-DANE <- read_excel("C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/DANE - PIB.xlsx",
-                   sheet = "Cuadro 3")
+DANE <- read_excel("DANE - PIB.xlsx", sheet = "Cuadro 3")
 DANE.PIB <- DANE[-(1:7), ]
 rm(DANE)
 names(DANE.PIB) <- DANE.PIB[1, ]
@@ -273,17 +272,29 @@ Base <- merge(Base, DANE.PIB, by = "estu_cod_reside_depto")
 rm(DANE.PIB)
 dim(Base)
 
-Panel.Carac.Gen <- read_excel("C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/PANEL_CARACTERISTICAS_GENERALES(2022).xlsx")
+Panel.Carac.Gen <- read_excel("PANEL_CARACTERISTICAS_GENERALES(2022).xlsx")
 Panel.Carac.Gen.Rur <- Panel.Carac.Gen[!is.na(Panel.Carac.Gen$pobl_rur),
                                        c("codmpio", "ano", "pobl_rur", "pobl_tot")]
 rm(Panel.Carac.Gen)
 Panel.Carac.Gen.Rur <- Panel.Carac.Gen.Rur %>% 
   group_by(codmpio) %>%
-  slice(which.max(ano))
-Panel.Carac.Gen.Rur$pobl_rur_percent <- (Panel.Carac.Gen.Rur$pobl_rur/Panel.Carac.Gen.Rur$pobl_tot)*100
-Panel.Carac.Gen.Rur <- Panel.Carac.Gen.Rur[ , c("codmpio", "pobl_rur_percent")]
-colnames(Panel.Carac.Gen.Rur) <- c("estu_cod_reside_mcpio", "pobl_rur_percent")
-Base <- merge(Base, Panel.Carac.Gen.Rur, by = "estu_cod_reside_mcpio")
+  slice(which.max(ano)) 
+estu_cod_reside_depto <- c(rep(5, 125), rep(8, 23), 11, rep(13, 46), rep(15, 123),
+                           rep(17, 27), rep(18, 16), rep(19, 42), rep(20, 25),
+                           rep(23, 30), rep(25, 116), rep(27, 30), rep(41, 37),
+                           rep(44, 15), rep(47, 30), rep(50, 29), rep(52, 64),
+                           rep(54, 40), rep(63, 12), rep(66, 14), rep(68, 87),
+                           rep(70, 26), rep(73, 47), rep(76, 42), rep(81, 7),
+                           rep(85, 19), rep(86, 13), rep(88, 2), rep(91, 11),
+                           rep(94, 9), rep(95, 4), rep(97, 6), rep(99, 4))
+pobl_rur <- as.vector(tapply(Panel.Carac.Gen.Rur$pobl_rur, estu_cod_reside_depto, sum))
+pobl_tot <- as.vector(tapply(Panel.Carac.Gen.Rur$pobl_tot, estu_cod_reside_depto, sum))
+coddepto <- c(5, 8, 11, 13, 15, 17, 18, 19, 20, 23, 25, 27, 41,
+              44, 47, 50, 52, 54, 63, 66, 68, 70, 73, 76, 81, 85,
+              86, 88, 91, 94, 95, 97, 99)
+Panel.Carac.Gen.Rur <- cbind(coddepto, pobl_rur/pobl_tot*100)
+colnames(Panel.Carac.Gen.Rur) <- c("estu_cod_reside_depto", "pobl_rur_percent")
+Base <- merge(Base, Panel.Carac.Gen.Rur, by = "estu_cod_reside_depto")
 rm(Panel.Carac.Gen.Rur)
 dim(Base)
 
@@ -293,14 +304,14 @@ dim(Base)
 # el archivo original un documento de Excel con demasiadas columnas, las cuales 
 # no serán consultadas para el presente trabajo. De todas formas, se puede correr 
 # el archivo original en caso de trabajar con un ordenador con buena memoria RAM).
-Panel.Conf.Viol <- read_excel("C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/PANEL_CONFLICTO_Y_VIOLENCIA(2022)_Modificado.xlsx")
+Panel.Conf.Viol <- read_excel("PANEL_CONFLICTO_Y_VIOLENCIA(2022)_Modificado.xlsx")
 Panel.Conf.Viol.Desp <- Panel.Conf.Viol[!is.na(Panel.Conf.Viol$desplazados_expulsion),
                                         c("codmpio", "ano", "desplazados_expulsion")]
 rm(Panel.Conf.Viol)
 Panel.Conf.Viol.Desp <- Panel.Conf.Viol.Desp %>% 
   group_by(codmpio) %>%
   slice(which.max(ano))
-Panel.Carac.Gen <- read_excel("C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/PANEL_CARACTERISTICAS_GENERALES(2022).xlsx")
+Panel.Carac.Gen <- read_excel("PANEL_CARACTERISTICAS_GENERALES(2022).xlsx")
 Pobl_tot <- Panel.Carac.Gen[!is.na(Panel.Carac.Gen$pobl_tot),
                             c("codmpio", "ano", "pobl_tot")]
 rm(Panel.Carac.Gen)
@@ -348,20 +359,14 @@ Base <- merge(Base, MOE, by = "estu_cod_reside_depto")
 rm(MOE)
 dim(Base)
 
-# (Se recomienda crear un nuevo archivo de Excel para el Panel de Conflicto y
-# Violencia que contenga únicamente las columnas codmpio, ano, homicidios y
-# desplazados_expulsion, con el fin de no forzar la memoria del computador al ser 
-# el archivo original un documento de Excel con demasiadas columnas, las cuales 
-# no serán consultadas para el presente trabajo. De todas formas, se puede correr 
-# el archivo original en caso de trabajar con un ordenador con buena memoria RAM).
-Panel.Conf.Viol <- read_excel("C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/PANEL_CONFLICTO_Y_VIOLENCIA(2022)_Modificado.xlsx")
+Panel.Conf.Viol <- read_excel("PANEL_CONFLICTO_Y_VIOLENCIA(2022)_Modificado.xlsx")
 Homic.Depto <- Panel.Conf.Viol[-(1:75), c("codmpio", "ano", "homicidios")]
 rm(Panel.Conf.Viol)
 Homic.Depto <- Homic.Depto[!is.na(Homic.Depto$homicidios), ]
 Homic.Depto <- Homic.Depto %>% 
   group_by(codmpio) %>%
   slice(which.max(ano))
-Panel.Carac.Gen <- read_excel("C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/PANEL_CARACTERISTICAS_GENERALES(2022).xlsx")
+Panel.Carac.Gen <- read_excel("PANEL_CARACTERISTICAS_GENERALES(2022).xlsx")
 Pobl_tot <- Panel.Carac.Gen[!is.na(Panel.Carac.Gen$pobl_tot), 
                             c("codmpio", "ano", "pobl_tot")]
 rm(Panel.Carac.Gen)
@@ -402,9 +407,7 @@ length(unique(Base$estu_cod_reside_depto))
 length(unique(Base$estu_cod_reside_mcpio))
 
 # (Opcional: Almacenar la base de datos en el computador).
-write.table(Base,
-            "C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/Base.txt",
-            sep = ";", dec = ".", row.names = TRUE)
+write.table(Base, "Base.txt", sep = ";", dec = ".", row.names = TRUE)
 
 rm(list = ls())
 
@@ -425,12 +428,12 @@ library(patchwork)
 
 # Se utiliza la base de datos creada en la sección anterior. Se puede cargar
 # desde el computador en caso que ya esté almacenada:
-Base <- read.table("C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/Base.txt",
+Base <- read.table("C:/Users/USER/OneDrive/Documentos/R/a26 Código Caso de estudio - EB - 2025-1/Base.txt",
                    header = TRUE, sep = ";", dec = ".")
 summary(Base$punt_global)
 
 # Cargar el documento de GeoJSON adjunto para la creación de los mapas por mcpio:
-municipios_geo <- st_read("C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/colombia-municipios.json",
+municipios_geo <- st_read("C:/Users/USER/OneDrive/Documentos/R/a26 Código Caso de estudio - EB - 2025-1/colombia-municipios.json",
                           quiet = TRUE)
 municipios_geo$id <- as.numeric(municipios_geo$id)
 
@@ -519,8 +522,9 @@ p2 <- ggplot(mapa_punt_global_media_mcpio) +
   ); p2
 rm(mapa_punt_global_media_mcpio)
 
-# Se carga la base de datos anexo_pobreza_monetaria_18_departamento.xls: 
-Incid.Pobr.Mon <- read_excel("C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/anexo_pobreza_monetaria_18_departamento.xls",
+# Se carga la base de datos anexo_pobreza_monetaria_18_departamento.xls. Este
+# documento se encuentra en la carpeta "Data" de GitHub: 
+Incid.Pobr.Mon <- read_excel("anexo_pobreza_monetaria_18_departamento.xls",
                              sheet = "Pobreza Monetaria (%)")
 Incid.Pobr.Mon.2018 <- Incid.Pobr.Mon[-(1:9), ]
 rm(Incid.Pobr.Mon)
@@ -567,8 +571,9 @@ rm(mapa_incid_pobr_mon_depto)
 p1+p3
 
 # Se carga la base de datos MEN_ESTADISTICAS_EN_EDUCACION_EN_PREESCOLAR__B_SICA_
-# Y_MEDIA_POR_MUNICIPIO_20250701.csv: 
-MEN <- read_csv("C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/MEN_ESTADISTICAS_EN_EDUCACION_EN_PREESCOLAR__B_SICA_Y_MEDIA_POR_MUNICIPIO_20250701.csv")
+# Y_MEDIA_POR_MUNICIPIO_20250701.csv. Este documento se encuentra en la carpeta
+# "Data" de GitHub: 
+MEN <- read_csv("MEN_ESTADISTICAS_EN_EDUCACION_EN_PREESCOLAR__B_SICA_Y_MEDIA_POR_MUNICIPIO_20250701.csv")
 MEN.2022 <- MEN %>% 
   group_by(CÓDIGO_MUNICIPIO) %>%
   slice(which(AÑO == 2022))
@@ -632,10 +637,11 @@ library(rnaturalearth)
 library(stringi)
 library(viridis)
 library(patchwork)
+library(RColorBrewer)
 
 # Se utiliza la base de datos creada en la primera sección anterior. Se puede
 # cargar desde el computador en caso que ya esté almacenada:
-Base <- read.table("C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/Base.txt",
+Base <- read.table("C:/Users/USER/OneDrive/Documentos/R/a26 Código Caso de estudio - EB - 2025-1/Base.txt",
                    header = TRUE, sep = ";", dec = ".")
 
 # Análisis de variables cualitativas:
@@ -661,8 +667,7 @@ table(Base$fami_tieneinternet)
 table(Base$fami_tieneinternet)/nrow(Base)
 
 # Mapas:
-municipios_geo <- st_read("C:/Users/USER/OneDrive/Documentos/LaTeX/b34 Caso de estudio - EB - 2025-1/Insumos para la base de datos/colombia-municipios.json",
-                          quiet = TRUE)
+municipios_geo <- st_read("colombia-municipios.json", quiet = TRUE)
 municipios_geo$id <- as.numeric(municipios_geo$id)
 
 educ_1_madre_percent <- aggregate(Base$fami_educacionmadre,
@@ -784,48 +789,80 @@ p2.3 <- ggplot(mapa_internet_no) +
   ); p2.3
 rm(mapa_internet_no)
 
-p2.1+p2.2+p2.3
+(p2.1 + p2.2) / (plot_spacer() + p2.3 + plot_spacer())
 rm(p2.1, p2.2, p2.3)
 
-# Análisis de variables cuantitativas
+# Boxplots para variables con más de una categoría:
+p2.4 <- ggplot(Base, aes(x = fami_numlibros, y = punt_global,
+                         fill = fami_numlibros, color = fami_numlibros)) +
+               geom_boxplot(alpha = 1) + 
+               labs(title = "",
+                    x = "Número de libros en casa",
+                    y = "Puntaje global") +
+                    scale_fill_brewer(palette = "Pastel1") +  
+                    scale_color_brewer(palette = "Set1") +   
+               theme_minimal() +
+               theme(legend.position = "none"); p2.4
+
+p2.5 <- ggplot(Base, aes(x = fami_estratovivienda, y = punt_global,
+                         fill = fami_estratovivienda, color = fami_estratovivienda)) +
+               geom_boxplot(alpha = 1) +
+               labs(title = "",
+                    x = "Estrato socioeconómico",
+                    y = "Puntaje global") +
+               scale_fill_brewer(palette = "Pastel1") +
+               scale_color_brewer(palette = "Set1") +
+               theme_minimal() +
+               theme(legend.position = "none"); p2.5
+
+p2.4 / p2.5
+rm(p2.4, p2.5)
+
+# Análisis de variables cuantitativas:
 summary(Base$doc_por_est)
 summary(Base$RISK_VICTIM_2022)
 summary(Base$risk_percent)
 summary(Base$prom_dep_homic)
+summary(Base$nbi)
+summary(Base$PIB)
+summary(Base$pobl_rur_percent)
+summary(Base$tasa_desp_forz)
 
 # Boxplots:
 par(mfrow = c(2, 2))
+col <- brewer.pal(9, "Set1")[1:9]
+fill <- brewer.pal(9, "Pastel1")[1:9]
 
 boxplot(Base$doc_por_est,
         main = "Docentes por estudiante",
         ylab = "Razón de docentes/estudiantes",
-        col = "lightblue",
-        border = "dodgerblue")
+        col = fill[1],
+        border = col[1])
 text(x = 1, y = max(Base$doc_por_est), labels = paste("Chima"), pos = 1,
-     col = "dodgerblue")
+     col = col[1])
 Base[which(Base$doc_por_est > 0.7), "estu_cod_reside_mcpio"]
 
 boxplot(Base$RISK_VICTIM_2022,
         main = "Riesgo por hechos victimizantes",
         ylab = "Índice",
-        col = "palegreen",
-        border = "green")
+        col = fill[2],
+        border = col[2])
 
 boxplot(Base$risk_percent,
         main = "Municipios en riesgo de violencia",
         ylab = "Porcentaje",
-        col = "lemonchiffon",
-        border = "gold")
+        col = fill[3],
+        border = col[3])
 
 boxplot(Base$prom_dep_homic,
         main = "Promedio departamental de homicidios",
         ylab = "Promedio ponderado",
-        col = "lightsalmon",
-        border = "darkorange")
+        col = fill[4],
+        border = col[4])
 text(x = 1, y = 1137, labels = paste("Bogotá"), pos = 1,
-     col = "darkorange")
+     col = col[4])
 text(x = 1, y = 657, labels = paste("Valle del Cauca"), pos = 1,
-     col = "darkorange")
+     col = col[4])
 Base %>%
   group_by(estu_cod_reside_depto) %>%
   summarise(valor_unico = unique(prom_dep_homic)) %>%   
@@ -956,3 +993,689 @@ rm(prom_dep_homic, mapa_prom_dep_homic)
 p3+p4+p5+p6
 
 rm(list = ls())
+
+#==============================================================================
+# Implementación y diagnóstico de los modelos
+#==============================================================================
+
+library(dplyr)
+library(ggplot2)
+library(tictoc)
+library(data.table)
+library(RColorBrewer)
+library(coda)
+library(mvtnorm)
+library(Matrix)
+
+# Se utiliza la base de datos creada en la primera sección. Se puede cargar
+# desde el computador en caso que ya esté almacenada:
+Base <- read.table("Base.txt", header = TRUE, sep = ";", dec = ".")
+# Número de departamentos:
+m <- length(unique(Base$estu_cod_reside_depto)); m
+# Número de municipios:
+n <- length(unique(Base$estu_cod_reside_mcpio)); n
+# Número de estudiantes:
+N <- nrow(Base); N
+
+# Vector de puntajes globales:
+y <- Base$punt_global
+
+# Tabla de estadísticos departamentales:
+estadisticos_depto <- Base %>% 
+  group_by(estu_cod_reside_depto) %>% 
+  summarise(
+    cod_depto = first(estu_cod_reside_depto),
+    name = first(estu_depto_reside),
+    nk = n(), 
+    ybk = mean(punt_global), 
+    s2yk = var(punt_global)
+  ) %>% 
+  ungroup() %>% 
+  select(-estu_cod_reside_depto)
+head(estadisticos_depto)
+
+# Tabla de estadísticos municipales:
+estadisticos_mcpio <- Base %>% 
+  group_by(estu_cod_reside_mcpio) %>% 
+  summarise(
+    cod_depto = first(estu_cod_reside_depto),
+    cod_mcpio = first(estu_cod_reside_mcpio),
+    name = first(estu_mcpio_reside),
+    njk = n(), 
+    ybjk = mean(punt_global), 
+    s2yjk = var(punt_global)
+  ) %>% 
+  ungroup() %>% 
+  select(-estu_cod_reside_mcpio)
+head(estadisticos_mcpio)
+
+# Tamaños de muestra departamentales:
+nk <- estadisticos_depto$nk
+length(nk)
+# Tamaños de muestra municipales:
+njk <- estadisticos_mcpio$njk
+length(njk)
+# Identificadores de pertenencia al departamento:
+mcpios_chr <- sprintf("%05d", Base$estu_cod_reside_mcpio)
+index <- substr(unique(mcpios_chr), 1, 2)
+index <- as.numeric(index)
+index <- match(index, unique(index))
+length(index)
+
+# Estadísticos suficientes municipales:
+ybjk <- estadisticos_mcpio$ybjk
+s2yjk <- estadisticos_mcpio$s2yjk
+
+# Configuración del algoritmo de M1:
+samples <- matrix(NA, nrow = 5000, ncol = 2331) #Matriz de almacenamiento
+n_burn <- 5000
+n_thin <- 10
+ac = 0 #Contador de propuestas de Metropolis aceptadas inicia en 0
+row <- 1 #Contador para las filas aceptadas inicia en 1
+
+#Hiperparámetros de M1:
+mu_mu = 250
+sigma2_mu = 1
+nu_tau = 2
+sigma2_tau = 2
+a_sigma = 1/2
+b_sigma = 1/2
+a_alpha_kappa = 2
+b_alpha_kappa = 140
+a_beta_kappa = 250000
+b_beta_kappa = 1/2
+nu_sigma = 2
+nu_kappa = 2
+
+# Muestreador de Gibbs para M1:
+MCMC1 <- function(B, y, nk, njk, ybjk, s2yjk, mu_mu, sigma2_mu,
+                  nu_tau, sigma2_tau, a_sigma, b_sigma, a_alpha_kappa,
+                  b_alpha_kappa, a_beta_kappa, b_beta_kappa, nu_sigma,
+                  nu_kappa) {
+  
+  # Valores iniciales:
+  zeta_jk <- ybjk
+  kappa2_jk <- s2yjk  
+  theta_k <- as.vector(tapply(zeta_jk, index, mean))
+  sigma2_k <- as.vector(tapply(zeta_jk, index, var))
+  sigma2_k[3] <- 0.1 #Corregir la varianza 0 en la media de Bogotá
+  kappa2_k = rep(2, 33)
+  mu = mean(theta_k)
+  tau2 = var(theta_k)
+  sigma2 = 2
+  alpha_kappa = 2
+  beta_kappa = 2
+  
+  # Cadena MCMC:
+  for (b in 1:B) {
+    # Actualizar zeta_j,k:
+    v_zeta_jk <- 1/(njk/kappa2_jk+1/sigma2_k[index])
+    m_zeta_jk <- v_zeta_jk*(njk*ybjk/kappa2_jk+theta_k[index]/sigma2_k[index])
+    zeta_jk <- rnorm(n, mean = m_zeta_jk, sd = sqrt(v_zeta_jk))
+    mean.zeta_jk <- as.vector(tapply(zeta_jk, index, mean))
+    var.zeta_jk <- as.vector(tapply(zeta_jk, index, var))
+    var.zeta_jk[3] <- 0.1 #Corregir la varianza 0 en zeta de Bogotá
+    
+    # Actualizar kappa^2_j,k:
+    a_kappa2_jk <- 0.5*(nu_kappa+njk)
+    b_kappa2_jk <- 0.5*(nu_kappa*kappa2_k[index]+(njk-1)*s2yjk+njk*(ybjk-zeta_jk)^2)
+    kappa2_jk <- 1/rgamma(n, shape = a_kappa2_jk, rate = b_kappa2_jk)
+    sum.inverse.kappa2_jk <- as.vector(tapply(1/kappa2_jk, index, sum))
+    
+    # Actualizar theta_k:
+    v_theta_k <- 1/(nk/sigma2_k+1/tau2)
+    m_theta_k <- v_theta_k*(nk*mean.zeta_jk/sigma2_k+mu/tau2)
+    theta_k <- rnorm(m, mean = m_theta_k, sd = sqrt(v_theta_k))
+    
+    # Actualizar sigma^2_k:
+    a_sigma2_k <- 0.5*(nu_sigma+nk)
+    b_sigma2_k <- 0.5*(nu_sigma*sigma2+(nk-1)*var.zeta_jk+nk*(mean.zeta_jk-theta_k)^2)
+    sigma2_k <- 1/rgamma(m, shape = a_sigma2_k, rate = b_sigma2_k)
+    
+    # Actualizar kappa^2_k:
+    a_kappa2_k <- 0.5*(alpha_kappa+nk*nu_kappa)
+    b_kappa2_k <- 0.5*(2+nu_kappa*sum.inverse.kappa2_jk)
+    kappa2_k <- rgamma(m, shape = a_kappa2_k, rate = b_kappa2_k)
+    
+    # Actualizar mu:
+    v_mu <- 1/(m/tau2+1/sigma2_mu)
+    m_mu <- v_mu*(33*mean(theta_k)/tau2+mu_mu/sigma2_mu)
+    mu <- rnorm(1, mean = m_mu, sd = sqrt(v_mu))
+    
+    # Actualizar tau^2:
+    a_tau2 <- 0.5*(nu_tau+m)
+    b_tau2 <- 0.5*((m-1)*var(theta_k)+m*(mean(theta_k)-mu)^2+nu_tau*sigma2_tau)
+    tau2 <- 1/rgamma(1, shape = a_tau2, rate = b_tau2)
+    
+    # Actualizar sigma^2:
+    a_sigma2 <- 0.5*(a_sigma+m*nu_sigma)
+    b_sigma2 <- 0.5*(b_sigma+nu_sigma*sum(1/sigma2_k))
+    sigma2 <- rgamma(1, shape = a_sigma2, rate = b_sigma2)
+    
+    # Simular alpha_kappa (Algoritmo de Metropolis):
+    delta2 <- 0.1 #Parámetro de ajuste
+    
+    # Paso 1: Propuesta en espacio transformado:
+    gamma_c <- log(alpha_kappa)  #Transformar a espacio real
+    gamma_p <- rnorm(1, gamma_c, sqrt(delta2))  #Propuesta normal 
+    alpha_kappa_p <- exp(gamma_p)  #Transformar de regreso
+    
+    # Paso 2: Probabilidad de aceptación con Jacobiano:
+    log_jacobian_c <- log(alpha_kappa)
+    log_jacobian_p <- log(alpha_kappa_p)
+    
+    r = exp(0.5*m*alpha_kappa_p*log(0.5*beta_kappa)-
+              m*lgamma(0.5*alpha_kappa_p)+(0.5*alpha_kappa_p)*sum(log(kappa2_k))+
+              (a_alpha_kappa-1)*log(alpha_kappa_p)-b_alpha_kappa*alpha_kappa_p-
+              (0.5*m*alpha_kappa*log(0.5*beta_kappa)-
+                 m*lgamma(0.5*alpha_kappa)+(0.5*alpha_kappa)*sum(log(kappa2_k))+
+                 (a_alpha_kappa-1)*log(alpha_kappa)-b_alpha_kappa*alpha_kappa)+
+              log_jacobian_p-log_jacobian_c)
+    
+    # Paso 3: Aceptar o rechazar la propuesta:
+    if (rbinom(1, 1, min(1, r)) == 1) {
+      alpha_kappa <- alpha_kappa_p
+      ac <- ac+1
+    }
+    ar = ac/B
+    
+    # Actualizar beta_kappa:
+    a_bet_kappa <- 0.5*m*alpha_kappa+a_beta_kappa
+    b_bet_kappa <- 0.5*m*mean(kappa2_k)+b_beta_kappa 
+    beta_kappa <- rgamma(1, shape = a_bet_kappa, rate = b_bet_kappa)
+    
+    # Log-verosimilitud:
+    ll <- sum(dnorm(x = y, mean = rep(zeta_jk, njk),
+                    sd = sqrt(rep(kappa2_jk, njk)), log = TRUE))
+    
+    # Almacenar resultados después de burn-in y thinning:
+    if (b>n_burn && b %% n_thin == 1) {
+      samples[row, ] <- c(zeta_jk, kappa2_jk, theta_k, sigma2_k, kappa2_k, mu, tau2,
+                          sigma2, alpha_kappa, beta_kappa, ll)
+      row <- row+1
+    }
+    
+    # Progreso:
+    ncat <- floor(B/10)
+    if (b %% ncat == 0) {
+      cat(100 * round(b/B, 1), "% completado ... \n", sep = "")
+    }
+  }
+  
+  # Salida final:
+  colnames(samples) <- c(paste0("zeta_jk[", 1:n, "]"), paste0("kappa2_jk[", 1:n, "]"),
+                         paste0("theta_k[", 1:m, "]"), paste0("sigma2_k[", 1:m, "]"),
+                         paste0("kappa2_k[", 1:m, "]"), "mu", "tau2", "sigma2",
+                         "alpha_kappa", "beta_kappa", "ll")
+  samples <- as.data.frame(samples)
+  nombre_archivo <- paste0("chain1 ", format(Sys.time(), "%d.%m.%Y %H.%M"), ".txt")
+  write.table(samples, file = nombre_archivo, sep = ";", dec = ".",
+              row.names = FALSE, quote = TRUE)
+  message("Archivo exportado como: ", normalizePath(nombre_archivo))
+  message("Tasa de aceptación de las simulaciones de alpha_kappa: ", ar)
+}
+
+# Ajuste del Modelo 1:
+set.seed(438); tictoc::tic(); MCMC1(B = 55000, y, nk, njk, ybjk, s2yjk, mu_mu,
+                                    sigma2_mu, nu_tau, sigma2_tau, a_sigma,
+                                    b_sigma, a_alpha_kappa, b_alpha_kappa,
+                                    a_beta_kappa, b_beta_kappa, nu_sigma,
+                                    nu_kappa); tictoc::toc(); rm(samples)
+
+ll_muestreador_1 <- fread("chain1 22.07.2025 02.10.txt", header = TRUE,
+                          sep = ";", dec = ".", select = "ll")
+
+col <- brewer.pal(9, "Set1")[1:9]
+plot(ll_muestreador_1$ll, type = "p", pch = 1, cex = .5, col = col[2],
+     xlab = "Iteración", ylab = "Log-verosimilitud",
+     main = "Modelo 1")
+abline(h = mean(ll_muestreador_1$ll), lwd = 3, col = col[2])
+rm(ll_muestreador_1) 
+
+# Tamaños efectivos de muestra:
+
+zeta_jk.muestreador_1 <- fread("chain1 22.07.2025 02.10.txt", header = TRUE,
+                               sep = ";", dec = ".", select = c(1:1113))
+neff <- effectiveSize(zeta_jk.muestreador_1)
+summary(round(neff, 0))
+rm(zeta_jk.muestreador_1)
+
+kappa2_jk.muestreador_1 <- fread("chain1 22.07.2025 02.10.txt", header = TRUE,
+                                 sep = ";", dec = ".", select = c(1114:2226))
+neff <- effectiveSize(kappa2_jk.muestreador_1)
+summary(round(neff, 0))
+rm(kappa2_jk.muestreador_1)
+
+theta_k.muestreador_1 <- fread("chain1 22.07.2025 02.10.txt", header = TRUE,
+                               sep = ";", dec = ".", select = c(2227:2259))
+neff <- effectiveSize(theta_k.muestreador_1)
+summary(round(neff, 0))
+rm(theta_k.muestreador_1)
+
+sigma2_k.muestreador_1 <- fread("chain1 22.07.2025 02.10.txt", header = TRUE,
+                                sep = ";", dec = ".", select = c(2260:2292))
+neff <- effectiveSize(sigma2_k.muestreador_1)
+summary(round(neff, 0))
+rm(sigma2_k.muestreador_1)
+
+kappa2_k.muestreador_1 <- fread("chain1 22.07.2025 02.10.txt", header = TRUE,
+                                sep = ";", dec = ".", select = c(2293:2325))
+neff <- effectiveSize(kappa2_k.muestreador_1)
+summary(round(neff, 0))
+rm(kappa2_k.muestreador_1)
+
+param.unicos.muestreador_1 <- fread("chain1 22.07.2025 02.10.txt", header = TRUE,
+                                    sep = ";", dec = ".", select = c(2326:2330))
+names(param.unicos.muestreador_1)
+neff <- effectiveSize(param.unicos.muestreador_1); round(neff, 0)
+rm(param.unicos.muestreador_1)
+
+# Creación de las variables auxiliares para las covariables individuales:
+computador <- ifelse(Base$fami_tienecomputador == "Si", 1, 0)
+internet <- ifelse(Base$fami_tieneinternet == "Si", 1, 0)
+Libros_1 <- ifelse(Base$fami_numlibros == "0 A 10 LIBROS", 1, 0)
+Libros_2 <- ifelse(Base$fami_numlibros == "11 A 25 LIBROS", 1, 0)
+Libros_3 <- ifelse(Base$fami_numlibros == "26 A 100 LIBROS", 1, 0)
+Estrato_1 <- ifelse(Base$fami_estratovivienda == "Estrato 1", 1, 0)
+Estrato_2 <- ifelse(Base$fami_estratovivienda == "Estrato 2", 1, 0)
+Estrato_3 <- ifelse(Base$fami_estratovivienda == "Estrato 3", 1, 0)
+Estrato_4 <- ifelse(Base$fami_estratovivienda == "Estrato 4", 1, 0)
+Estrato_5 <- ifelse(Base$fami_estratovivienda == "Estrato 5", 1, 0)
+Estrato_6 <- ifelse(Base$fami_estratovivienda == "Estrato 6", 1, 0)
+etnia <- ifelse(Base$estu_tieneetnia == "Si", 1, 0)
+X <- cbind(Base$fami_educacionmadre, computador, internet, Libros_1, Libros_2,
+           Libros_3, Estrato_1, Estrato_2, Estrato_3, Estrato_4, Estrato_5,
+           Estrato_6, etnia)
+X <- as.matrix(X)
+dim(X)
+
+# Matriz de covariables municipales:
+Z <- Base[ , c("nbi", "doc_por_est", "RISK_VICTIM_2022")]
+Z <- as.matrix(Z)
+dim(Z)
+
+# Matriz de covariables departamentales:
+W <- Base[ , c("PIB", "pobl_rur_percent", "tasa_desp_forz", "risk_percent",
+               "prom_dep_homic")]
+W <- as.matrix(W)
+dim(W)
+
+# Modelo de regresión aditivo por bloques para los zeta_i,j,k:
+X_total <- cbind(X, Z, W)
+dim(X_total)
+df <- data.frame(y = y, X_total)
+betas_estimados <- lm(y ~ ., data = df)
+betas_estimados <- betas_estimados$coefficients
+beta_estimado <- as.numeric(betas_estimados[1]) #Estimación MCO para beta
+betaE_estimado <- as.vector(betas_estimados[c(2:14)]) #Estimación MCO para betaE
+betaM_estimado <- as.vector(betas_estimados[c(15:17)]) #Estimación MCO para betaM
+betaD_estimado <- as.vector(betas_estimados[c(18:22)]) #Estimación MCO para betaD
+mean(betaE_estimado); mean(betaM_estimado); mean(betaD_estimado)
+var(betaE_estimado); var(betaM_estimado); var(betaD_estimado)
+
+# Identificadores de pertenencia al municipio y al departamento:
+mcpios_chr <- Base$estu_cod_reside_mcpio
+index.mcpio <- as.integer(factor(mcpios_chr))
+length(index.mcpio) 
+deptos_chr <- Base$estu_cod_reside_depto
+index.depto <- as.integer(factor(deptos_chr))
+length(index.depto)
+
+# Función de sumas matriciales en la actualización de betaE:
+calcular_suma_global <- function(X, kappa2, municipio, departamento) {
+  if (!is.matrix(X)) stop("X debe ser una matriz.")
+  n <- nrow(X)
+  p <- ncol(X)
+  if (length(kappa2) != n || length(municipio) != n || length(departamento) != n) {
+    stop("Todos los vectores deben tener longitud igual al número de filas de X.")
+  }
+  suma_total <- matrix(0, p, p)
+  departamentos <- unique(departamento)
+  for (d in departamentos) {
+    idx_dep <- which(departamento == d)
+    municipios_en_dep <- unique(municipio[idx_dep])
+    for (m in municipios_en_dep) {
+      idx_mun <- which(departamento == d & municipio == m)
+      X_jk <- X[idx_mun, , drop = FALSE]
+      k2_jk <- unique(kappa2[idx_mun])
+      if (length(k2_jk) != 1) stop("kappa2 debe ser constante dentro del municipio.")
+      suma_total <- suma_total + (1 / k2_jk) * crossprod(X_jk)
+    }
+  }
+  return(suma_total)
+}
+
+# Función de sumas vectoriales en la actualización de betaE:
+calcular_vector_pesado <- function(X, y, cE, kappa2, municipio, departamento) {
+  if (!is.matrix(X)) stop("X debe ser una matriz.")
+  n <- nrow(X)
+  p <- ncol(X)
+  if (length(y) != n || length(cE) != n || length(kappa2) != n ||
+      length(municipio) != n || length(departamento) != n) {
+    stop("Todos los vectores deben tener la misma longitud que el número de filas de X.")
+  }
+  resultado <- rep(0, p)
+  departamentos <- unique(departamento)
+  for (d in departamentos) {
+    idx_dep <- which(departamento == d)
+    municipios_en_dep <- unique(municipio[idx_dep])
+    for (m in municipios_en_dep) {
+      idx_mun <- which(departamento == d & municipio == m)
+      X_jk <- X[idx_mun, , drop = FALSE]
+      y_jk <- y[idx_mun]
+      cE_jk <- cE[idx_mun]
+      k2_jk <- unique(kappa2[idx_mun])
+      if (length(k2_jk) != 1) stop("kappa2 debe ser constante dentro del municipio.")
+      diferencia <- y_jk - cE_jk
+      suma_local <- t(X_jk) %*% diferencia  # vector de longitud p
+      resultado <- resultado + (1 / k2_jk) * as.vector(suma_local)
+    }
+  }
+  return(resultado)
+}
+
+# Función de sumas matriciales en la actualización de betaM:
+calcular_matriz_municipal <- function(Z, id_muni_est, kappa2_jk) {
+  n_munis <- nrow(Z)
+  p <- ncol(Z)  # Número de covariables municipales
+  njk <- tabulate(id_muni_est, nbins = n_munis)  # Vector de 1113
+  resultado <- matrix(0, nrow = p, ncol = p)
+  for (j in seq_len(n_munis)) {
+    if (njk[j] > 0) {
+      zj <- Z[j, ]
+      zj_outer <- tcrossprod(zj)  # zj %*% t(zj)
+      resultado <- resultado + (njk[j] / kappa2_jk[j]) * zj_outer
+    }
+  }
+  return(resultado)
+}
+
+# Función de sumas vectoriales en la actualización de betaM:
+calcular_vector_municipal <- function(Z, kappa2_jk, id_muni_est, y, cM) {
+  n_munis <- nrow(Z)
+  p <- ncol(Z)  # número de variables municipales
+  resultado <- numeric(p)  # acumulador
+  suma_residuos_muni <- numeric(n_munis)
+  for (j in seq_len(n_munis)) {
+    idx_estudiantes <- which(id_muni_est == j)
+    if (length(idx_estudiantes) > 0) {
+      suma_residuos_muni[j] <- sum(y[idx_estudiantes] - cM[idx_estudiantes])
+    }
+  }
+  for (j in seq_len(n_munis)) {
+    if (kappa2_jk[j] > 0) {
+      resultado <- resultado + Z[j, ] * (suma_residuos_muni[j] / kappa2_jk[j])
+    }
+  }
+  return(resultado)
+}
+
+# Función de sumas matriciales en la actualización de betaD:
+calcular_matriz_departamental <- function(W, deptos, id_muni_est, kappa2_jk) {
+  n_munis <- length(kappa2_jk)
+  n_deptos <- nrow(W)
+  n_est_por_muni <- tabulate(id_muni_est, nbins = n_munis)  # vector de largo 1113
+  resultado <- matrix(0, nrow = ncol(W), ncol = ncol(W))
+  for (k in seq_len(n_deptos)) {
+    idx_munis <- which(deptos == k)
+    escalar_k <- sum(n_est_por_muni[idx_munis] / kappa2_jk[idx_munis])
+    wk <- W[k, ]
+    wk_outer <- tcrossprod(wk)  # más eficiente que wk %*% t(wk)
+    resultado <- resultado + escalar_k * wk_outer
+  }
+  return(resultado)
+}
+
+# Función de sumas vectoriales en la actualización de betaD:
+calcular_vector_departamental <- function(W, deptos, id_muni_est, kappa2_jk, y, cD) {
+  n_deptos <- nrow(W)
+  n_munis <- length(kappa2_jk)
+  suma_residuos_muni <- numeric(n_munis)
+  for (j in seq_len(n_munis)) {
+    idx <- which(id_muni_est == j)
+    suma_residuos_muni[j] <- sum(y[idx] - cD[idx])
+  }
+  resultado <- numeric(ncol(W))  # dimensión 5
+  for (k in seq_len(n_deptos)) {
+    idx_munis <- which(deptos == k)
+    escalar_k <- sum(suma_residuos_muni[idx_munis] / kappa2_jk[idx_munis])
+    resultado <- resultado + escalar_k * W[k, ]
+  }
+  return(resultado)
+}
+
+# Matriz Z sin distinguir estudiantes:
+nbi_mcpio <- as.vector(tapply(Base$nbi, index.mcpio, function(x) unique(x)))
+length(nbi_mcpio)
+doc_por_est_mcpio <- as.vector(tapply(Base$doc_por_est, index.mcpio, function(x) unique(x)))
+length(doc_por_est_mcpio)
+RISK_VICTIM_2022_mcpio <- as.vector(tapply(Base$RISK_VICTIM_2022, index.mcpio, function(x) unique(x)))
+RISK_VICTIM_2022_mcpio <- sapply(RISK_VICTIM_2022_mcpio, function(x) x[1])
+RISK_VICTIM_2022_mcpio <- as.vector(unlist(RISK_VICTIM_2022_mcpio))
+length(RISK_VICTIM_2022_mcpio)
+Z.1113 <- cbind(nbi_mcpio, doc_por_est_mcpio, RISK_VICTIM_2022_mcpio)
+Z.1113 <- as.matrix(Z.1113)
+dim(Z.1113) 
+
+# Matriz W sin distinguir ni estudiantes ni municipios:
+PIB_depto <- as.vector(tapply(Base$PIB, index.depto, function(x) unique(x)))
+length(PIB_depto)
+pobl_rur_percent_depto <- as.vector(tapply(Base$pobl_rur_percent, index.depto, function(x) unique(x)))
+length(pobl_rur_percent_depto)
+tasa_desp_forz_depto <- as.vector(tapply(Base$tasa_desp_forz, index.depto, function(x) unique(x)))
+length(tasa_desp_forz_depto)
+risk_percent_depto <- as.vector(tapply(Base$risk_percent, index.depto, function(x) unique(x)))
+length(risk_percent_depto)
+prom_dep_homic_depto <- as.vector(tapply(Base$prom_dep_homic, index.depto, function(x) unique(x)))
+length(prom_dep_homic_depto)
+W.33 <- cbind(PIB_depto, pobl_rur_percent_depto, tasa_desp_forz_depto,
+              risk_percent_depto, prom_dep_homic_depto)
+W.33 <- as.matrix(W.33)
+
+# Configuración del algoritmo de M2:
+samples <- matrix(NA, nrow = 20, ncol = 1175) #Matriz de almacenamiento
+n_burn <- 0
+n_thin <- 5
+ac = 0 #Contador de propuestas de Metropolis aceptadas inicia en 0
+row <- 1 #Contador para las filas aceptadas inicia en 1
+
+# Hiperparámetros de M2:
+nu_beta = 20
+gamma_beta = 594
+nu_E = 20
+gamma_E = 134
+nu_M = 20
+gamma_M = 82
+nu_D = 20
+gamma_D = 1.5
+a_alpha_kappa = 2
+b_alpha_kappa = 140
+a_beta_kappa = 250000
+b_beta_kappa = 1/2
+mu_beta = 200
+mu_E = 1
+mu_M = -1
+mu_D = .01
+nu_kappa = 2
+
+# Muestreador de Gibbs para M2:
+MCMC2 <- function(B, y, nk, njk, ybjk, s2yjk, X, Z, W, nu_beta, gamma_beta,
+                  nu_E, gamma_E, nu_M, gamma_M, nu_D, gamma_D, a_alpha_kappa,
+                  b_alpha_kappa, a_beta_kappa, b_beta_kappa, mu_beta, mu_E, mu_M,
+                  mu_D, nu_kappa) {
+  
+  # Valores iniciales:
+  beta <- beta_estimado
+  betaE <- betaE_estimado
+  betaM <- betaM_estimado
+  betaD <- betaD_estimado
+  kappa2_jk <- s2yjk
+  kappa2_k <- rep(2, 33)
+  sigma2_beta = 500
+  sigma2_E = var(betaE_estimado)
+  sigma2_M = var(betaM_estimado)
+  sigma2_D = var(betaD_estimado)
+  alpha_kappa = 2
+  beta_kappa = 2
+  
+  # Cadena MCMC:
+  for (b in 1:B) {
+    # Actualizar beta:
+    c_ijk = X%*%betaE+Z%*%betaM+W%*%betaD 
+    diferencias <- y-c_ijk
+    v_beta <- 1/(sum(njk/kappa2_jk)+1/sigma2_beta)
+    m_beta <- v_beta*(sum((1/kappa2_jk)*as.vector(tapply(diferencias, index.mcpio, sum)))+mu_beta/sigma2_beta)
+    beta <- rnorm(1, mean = m_beta, sd = sqrt(v_beta))
+    
+    # Actualizar betaE:
+    c_ijkE = beta+Z%*%betaM+W%*%betaD 
+    big.kappa2_jk <- as.vector(kappa2_jk[index.mcpio])
+    Suma_global <- calcular_suma_global(X, big.kappa2_jk, index.mcpio, index.depto)
+    Vector_pesado <- as.vector(calcular_vector_pesado(X, y, c_ijkE, big.kappa2_jk, index.mcpio, index.depto))
+    MVC_E <- solve(Suma_global+(1/sigma2_E)*diag(13))
+    VM_E <- MVC_E%*%(Vector_pesado+(mu_E/sigma2_E)*rep(1, 13))
+    betaE <- as.vector(rmvnorm(1, mean = VM_E, sigma = MVC_E))
+    
+    # Actulizar betaM:
+    c_ijkM = beta+X%*%betaE+W%*%betaD 
+    Suma_global <- calcular_matriz_municipal(Z.1113, index.mcpio, kappa2_jk)
+    Vector_pesado <- as.vector(calcular_vector_municipal(Z.1113, kappa2_jk, index.mcpio, y, c_ijkM))
+    MVC_M <- solve(Suma_global+(1/sigma2_M)*diag(3))
+    VM_M <- MVC_M%*%(Vector_pesado+(mu_M/sigma2_M)*rep(1, 3))
+    betaM <- as.vector(rmvnorm(1, mean = VM_M, sigma = MVC_M))
+    
+    # Actualizar betaD:
+    c_ijkD = beta+X%*%betaE+Z%*%betaM
+    Suma_global <- calcular_matriz_departamental(W.33, index, index.mcpio, kappa2_jk)
+    Vector_pesado <- as.vector(calcular_vector_departamental(W.33, index, index.mcpio, kappa2_jk, y, c_ijkD))
+    MVC_D <- solve(Suma_global+(1/sigma2_D)*diag(5))
+    VM_D <-  MVC_D%*%(Vector_pesado+(mu_D/sigma2_D)*rep(1, 5))
+    betaD <- as.vector(rmvnorm(1, mean = VM_D, sigma = MVC_D))
+    
+    # Cálculo de los zeta_i,j,k:
+    zeta_ijk <- rep(beta, N)+X%*%betaE+Z%*%betaM+W%*%betaD
+    
+    # Actualizar kappa^2_j,k:
+    squares <- (y-zeta_ijk)^2
+    a_kappa2_jk <- 0.5*(nu_kappa+njk)
+    b_kappa2_jk <- 0.5*(as.vector(tapply(squares, index.mcpio, sum))+nu_kappa*(kappa2_k[index])^2)
+    kappa2_jk <- 1/rgamma(n, shape = a_kappa2_jk, rate = b_kappa2_jk)
+    sum.inverse.kappa2_jk <- as.vector(tapply(1/kappa2_jk, index, sum))
+    
+    # Actualizar kappa^2_k:
+    a_kappa2_k <- 0.5*(alpha_kappa+nk*nu_kappa)
+    b_kappa2_k <- 0.5*(beta_kappa+nu_kappa*sum.inverse.kappa2_jk)
+    kappa2_k <- rgamma(m, shape = a_kappa2_k, rate = b_kappa2_k)
+    
+    # Actualizar sigma^2_beta:
+    a_sigma2_beta <- 0.5*(nu_beta+1)
+    b_sigma2_beta <- 0.5*((beta-mu_beta)^2+nu_beta*gamma_beta)
+    sigma2_beta <- 1/rgamma(1, shape = a_sigma2_beta, rate = b_sigma2_beta)
+    
+    # Actualizar sigma^2_E:
+    SSR_E = t(betaE-mu_E*rep(1, 13))%*%diag(13)%*%(betaE-mu_E*rep(1, 13))
+    a_sigma2_E <- 0.5*(nu_E+13)
+    b_sigma2_E <- 0.5*(nu_E*gamma_E+SSR_E)
+    sigma2_E <- 1/rgamma(1, shape = a_sigma2_E, rate = b_sigma2_E)
+    
+    # Actualizar sigma^2_M:
+    SSR_M = t(betaM-mu_M*rep(1, 3))%*%diag(3)%*%(betaM-mu_M*rep(1, 3))
+    a_sigma2_M <- 0.5*(nu_M+3)
+    b_sigma2_M <- 0.5*(nu_M*gamma_M+SSR_M)
+    sigma2_M <- 1/rgamma(1, shape = a_sigma2_M, rate = b_sigma2_M)
+    
+    # Actualizar sigma^2_D:
+    SSR_D = t(betaD-mu_D*rep(1, 5))%*%diag(5)%*%(betaD-mu_D*rep(1, 5))
+    a_sigma2_D <- 0.5*(nu_D+5)
+    b_sigma2_D <- 0.5*(nu_D*gamma_D+SSR_D)
+    sigma2_D <- 1/rgamma(1, shape = a_sigma2_D, rate = b_sigma2_D)
+    
+    # Simular alpha_kappa (Algoritmo de Metropolis):
+    delta2 <- 0.1 #Parámetro de ajuste
+    
+    # Paso 1: Propuesta en espacio transformado:
+    gamma_c <- log(alpha_kappa)  #Transformar a espacio real
+    gamma_p <- rnorm(1, gamma_c, sqrt(delta2))  #Propuesta normal 
+    alpha_kappa_p <- exp(gamma_p)  #Transformar de regreso
+    
+    # Paso 2: Probabilidad de aceptación con Jacobiano:
+    log_jacobian_c <- log(alpha_kappa)
+    log_jacobian_p <- log(alpha_kappa_p)
+    
+    r = exp(0.5*m*alpha_kappa_p*log(0.5*beta_kappa)-
+              m*lgamma(0.5*alpha_kappa_p)+(0.5*alpha_kappa_p)*sum(log(kappa2_k))+
+              (a_alpha_kappa-1)*log(alpha_kappa_p)-b_alpha_kappa*alpha_kappa_p-
+              (0.5*m*alpha_kappa*log(0.5*beta_kappa)-
+                 m*lgamma(0.5*alpha_kappa)+(0.5*alpha_kappa)*sum(log(kappa2_k))+
+                 (a_alpha_kappa-1)*log(alpha_kappa)-b_alpha_kappa*alpha_kappa)+
+              log_jacobian_p-log_jacobian_c)
+    
+    # Paso 3: Aceptar o rechazar la propuesta:
+    if (rbinom(1, 1, min(1, r)) == 1) {
+      alpha_kappa <- alpha_kappa_p
+      ac <- ac+1
+    }
+    ar = ac/B
+    
+    # Actualizar beta_kappa:
+    a_bet_kappa <- 0.5*m*alpha_kappa+a_beta_kappa
+    b_bet_kappa <- 0.5*m*mean(kappa2_k)+b_beta_kappa 
+    beta_kappa <- rgamma(1, shape = a_bet_kappa, rate = b_bet_kappa)
+    
+    # Log-verosimilitud:
+    ll <- sum(dnorm(x = y, mean = zeta_ijk,
+                    sd = sqrt(rep(kappa2_jk, njk)), log = TRUE))
+    
+    # Almacenar resultados después de burn-in y thinning:
+    if (b>n_burn && b %% n_thin == 1) {
+      samples[row, ] <- c(beta, betaE, betaM, betaD, kappa2_jk,
+                          kappa2_k, sigma2_beta, sigma2_E, sigma2_M,
+                          sigma2_D, alpha_kappa, beta_kappa, ll)
+      row <- row+1
+    }
+    
+    # Progreso:
+    ncat <- floor(B/10)
+    if (b %% ncat == 0) {
+      cat(100 * round(b/B, 1), "% completado ... \n", sep = "")
+    }
+  }
+  
+  # Salida final:
+  colnames(samples) <- c("beta", paste0("betaE[", 1:13, "]"),
+                         paste0("betaM[", 1:3, "]"), paste0("betaD[", 1:5, "]"),
+                         paste0("kappa2_jk[", 1:n, "]"),
+                         paste0("kappa2_k[", 1:m, "]"), "sigma2_beta", 
+                         "sigma2_E", "sigma2_M", "sigma2_D", "alpha_kappa",
+                         "beta_kappa", "ll")
+  samples <- as.data.frame(samples)
+  nombre_archivo <- paste0("chain2 ", format(Sys.time(), "%d.%m.%Y %H.%M"), ".txt")
+  write.table(samples, file = nombre_archivo, sep = ";", dec = ".",
+              row.names = FALSE, quote = TRUE)
+  message("Archivo exportado como: ", normalizePath(nombre_archivo))
+  message("Tasa de aceptación de las simulaciones de alpha_kappa: ", ar)
+}
+
+# Ajuste del Modelo 2:
+set.seed(438); tictoc::tic(); MCMC2(100, y, nk, njk, ybjk, s2yjk, X, Z, W,
+                                    nu_beta, gamma_beta, nu_E, gamma_E, nu_M,
+                                    gamma_M, nu_D, gamma_D, a_alpha_kappa,
+                                    b_alpha_kappa, a_beta_kappa, b_beta_kappa,
+                                    mu_beta, mu_E, mu_M, mu_D,
+                                    nu_kappa); tictoc::toc(); rm(samples)
+
+chain2 <- read.table(
+  "C:/Users/Hewlett-Packard/Documents/R/Caso de estudio - EB - 2025-1/chain2 26.07.2025 09.26.txt",
+  header = TRUE, sep = ";", dec = ".")
+View(chain2)
+
+col <- brewer.pal(9, "Set1")[1:9]
+plot(chain2$ll, type = "p", pch = 1, cex = .5, col = col[1],
+     xlab = "Iteración", ylab = "Log-verosimilitud",
+     main = "Modelo 2")
+abline(h = mean(chain2$ll), lwd = 3, col = col[2])
+
+
+
+
+
